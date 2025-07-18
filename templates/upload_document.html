@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Upload de Documentos{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h2><i class="fas fa-upload me-2"></i>Upload de PDF</h2>
+        <div class="card card-body shadow-sm">
+            <form id="upload-form" action="{{ url_for('upload_document') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Título do Documento</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label for="doc_type" class="form-label">Tipo (3 letras)</label>
+                        <input type="text" class="form-control" id="doc_type" name="doc_type" 
+                               required maxlength="3" pattern="[A-Za-z]{3}" title="Digite exatamente 3 letras. Ex: MEM">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="doc_number" class="form-label">Número</label>
+                        <input type="number" class="form-control" id="doc_number" name="doc_number" 
+                               required min="0" placeholder="Ex: 01">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="doc_revision" class="form-label">Revisão</label>
+                        <input type="number" class="form-control" id="doc_revision" name="doc_revision" 
+                               required min="0" placeholder="Ex: 00">
+                    </div>
+                    <!-- CAMPO DE DATA DA REVISÃO ADICIONADO -->
+                    <div class="col-md-3">
+                        <label for="revision_date" class="form-label">Data da Revisão</label>
+                        <input type="date" class="form-control" id="revision_date" name="revision_date" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="department_id" class="form-label">Departamento de Destino</label>
+                    <select class="form-select" id="department_id" name="department_id" required>
+                        <option value="" disabled selected>Selecione um departamento</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="file" class="form-label">Arquivo PDF</label>
+                    <input type="file" class="form-control" name="file" id="file" accept=".pdf" required>
+                </div>
+                
+                <button type="submit" id="submit-button" class="btn btn-primary">
+                    <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                    <span id="button-text"><i class="fas fa-paper-plane me-2"></i>Enviar</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadForm = document.getElementById('upload-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const spinner = submitButton.querySelector('.spinner-border');
+
+    uploadForm.addEventListener('submit', function() {
+        submitButton.disabled = true;
+        spinner.classList.remove('d-none');
+        buttonText.textContent = 'Enviando...';
+    });
+</script>
+{% endblock %}

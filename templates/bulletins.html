@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Boletim Informativo{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <h2 class="text-center mb-4">Boletim Informativo Interno</h2>
+        
+        {% for bulletin in bulletins %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">{{ bulletin.title }}</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ bulletin.content | safe }}</p>
+            </div>
+            <div class="card-footer text-muted" style="font-size: 0.85rem;">
+                Publicado por: <strong>{{ bulletin.author.username }}</strong> em {{ bulletin.creation_date.strftime('%d/%m/%Y') }} | Válido até: {{ bulletin.expiration_date.strftime('%d/%m/%Y') }}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            Nenhum boletim informativo ativo no momento.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

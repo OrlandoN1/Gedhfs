@@ -1,0 +1,29 @@
+{% extends "base_auth.html" %}
+{% block title %}Login - GED HFS{% endblock %}
+{% block content %}
+<div class="col-md-4">
+    <div class="text-center mb-4">
+        <i class="fas fa-folder-open fa-3x" style="color: #0d2d53;"></i>
+        <h2 class="mt-2" style="color: #0d2d53; font-weight: 500;">GED HFS</h2>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h5 class="card-title text-center mb-4">Bem vindo Acesse o Sistema</h5>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Utilizador</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100"><i class="fas fa-sign-in-alt me-2"></i>Entrar</button>
+            </form>
+        </div>
+    </div>
+    <p class="mt-3 text-center text-muted" style="font-size: 1.2rem;">
+        Solicitar o cadastro de utilizador junto ao setor NTI por meio de abertura de chamado no sistema.
+    </p>
+</div>
+{% endblock %}

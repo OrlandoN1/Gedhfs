@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>{% block title %}GED HFS{% endblock %}</title>
+    
+    <!-- CSS DO BOOTSTRAP E FONT AWESOME -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- NOSSO CSS CUSTOMIZADO -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Adiciona um pouco de espaço para o rodapé não ficar colado no conteúdo */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- BARRA DE NAVEGAÇÃO -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}"><i class="fas fa-folder-open me-2"></i>GED HFS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-home fa-fw me-2"></i>Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('bulletins') }}"><i class="fas fa-bullhorn fa-fw me-2"></i>Boletim Informativo</a>
+                    </li>
+                    
+                    {% if current_user.is_authenticated and current_user.role.name in ['ADMIN', 'UPLOADER'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('upload_document') }}"><i class="fas fa-upload fa-fw me-2"></i>Upload de Documentos</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarGerenciarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cogs fa-fw me-2"></i>Gerenciar
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarGerenciarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('manage_documents') }}"><i class="fas fa-file-alt fa-fw me-2"></i>Documentos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('manage_bulletins') }}"><i class="fas fa-newspaper fa-fw me-2"></i>Boletins</a></li>
+                                
+                                {% if current_user.role.name == 'ADMIN' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('departments') }}"><i class="fas fa-building fa-fw me-2"></i>Departamentos</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('users') }}"><i class="fas fa-users-cog fa-fw me-2"></i>Usuários</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i> Olá, {{ current_user.username }} Seja bem-vindo!
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('my_account') }}"><i class="fas fa-user-shield fa-fw me-2"></i>Minha Conta</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Sair</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="py-3 mt-auto bg-light text-center">
+        <div class="container">
+            <span class="text-muted">Feito por NTI</span>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT DO BOOTSTRAP -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SCRIPT DE LOGOUT AUTOMÁTICO REMOVIDO -->
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

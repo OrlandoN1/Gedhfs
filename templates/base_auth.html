@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>{% block title %}GED HFS{% endblock %}</title>
+    
+    <!-- CSS DO BOOTSTRAP E FONT AWESOME -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- NOSSO CSS CUSTOMIZADO -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f4f6f9; /* Fundo cinza claro */
+        }
+        main {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- CONTEÚDO PRINCIPAL (SEM NAVBAR) -->
+    <main class="container mt-4 d-flex align-items-center justify-content-center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="position-absolute top-0 start-50 translate-middle-x p-3" style="z-index: 11">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="py-3 mt-auto bg-light text-center">
+        <div class="container">
+            <span class="text-muted">Feito por NTI</span>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT DO BOOTSTRAP -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

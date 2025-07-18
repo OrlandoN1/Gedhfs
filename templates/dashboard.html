@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Início - GEDHFS{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        
+        <div class="card card-body bg-light mb-4">
+            <form action="{{ url_for('dashboard') }}" method="get" class="row g-3 align-items-end">
+                {% if current_user.role.name == 'ADMIN' %}
+                <div class="col-md-5">
+                    <label for="department_id" class="form-label">Departamento</label>
+                    <select class="form-select" id="department_id" name="department_id">
+                        <option value="">-- Todos --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if dept.id == selected_dept_id %}selected{% endif %}>{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="col-md-4">
+                    <label for="doc_type_filter" class="form-label">Tipo de Documento</label>
+                    <select class="form-select" id="doc_type_filter" name="doc_type_filter">
+                        <option value="">-- Todos --</option>
+                        {% for doc_type in doc_types %}
+                            <option value="{{ doc_type }}" {% if doc_type == selected_doc_type %}selected{% endif %}>{{ doc_type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter me-2"></i>Filtrar</button>
+                <!-- Botão Limpar atualizado -->
+             <a href="{{ url_for('dashboard', clear='true') }}" class="btn btn-secondary"><i class="fas fa-eraser me-2"></i>Limpar</a>
+              </div>
+            </form>
+        </div>
+
+        <h2>Documentos Institucionais</h2>
+
+        <form action="{{ url_for('dashboard') }}" method="get" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Buscar no título ou conteúdo..." name="q" value="{{ search_query or '' }}">
+                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            </div>
+        </form>
+        <ul class="list-group">
+            {% for doc in documents %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary me-2">
+                        {{ doc.doc_type }}-{{ "%02d"|format(doc.doc_number) }}-R{{ "%02d"|format(doc.doc_revision) }}
+                    </span>
+                    <h6 class="my-0 d-inline">{{ doc.title }}</h6>
+                    <br>
+                    <small class="ms-1 text-muted">
+                        Depto: <strong>{{ doc.department.name }}</strong> | 
+                        Enviado em: {{ doc.upload_date.strftime('%d/%m/%Y') }}
+                    </small>
+                </div>
+                <a href="{{ url_for('view_document', doc_id=doc.id) }}" class="btn btn-sm btn-info">Visualizar</a>
+            </li>
+            {% else %}
+            <li class="list-group-item text-center">Nenhum documento ativo encontrado.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Usuários{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Seção da Esquerda: Formulário de Cadastro de Novo Utilizador -->
+    <div class="col-md-5">
+        <h2><i class="fas fa-user-plus me-2"></i>Cadastrar Utilizador</h2>
+        <div class="card card-body shadow-sm">
+            <form action="{{ url_for('users') }}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nome de Utilizador</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="department_ids" class="form-label">Departamentos</label>
+                    <select class="form-select" id="department_ids" name="department_ids" multiple required>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Segure Ctrl (ou Cmd no Mac) para selecionar mais de um.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="role" class="form-label">Papel (Role)</label>
+                    <select class="form-select" id="role" name="role" required>
+                        {% for role in roles %}
+                        <option value="{{ role.name }}">{{ role.value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success"><i class="fas fa-save me-2"></i>Salvar Utilizador</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seção da Direita: Tabela com Utilizadores Cadastrados -->
+    <div class="col-md-7">
+        <h2><i class="fas fa-users me-2"></i>Utilizadores Cadastrados</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Utilizador</th>
+                        <th>Departamentos</th>
+                        <th>Papel</th>
+                        <th>Status Aprovação</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# O loop deve percorrer a variável 'users' #}
+                    {% for user in users %}
+                    <tr class="{% if user.approval_status.name == 'PENDING' %}table-warning{% endif %}">
+                        <td>
+                            {{ user.username }}
+                            {% if not user.is_active %}
+                                <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for dept in user.departments %}
+                                <span class="badge bg-secondary">{{ dept.name }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ user.role.value }}</td>
+                        <td>
+                            {% if user.approval_status.name == 'APPROVED' %}
+                                <span class="badge bg-success">Aprovado</span>
+                            {% elif user.approval_status.name == 'PENDING' %}
+                                <span class="badge bg-warning text-dark">Pendente</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rejeitado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if user.approval_status.name == 'PENDING' %}
+                                <form action="{{ url_for('approve_user', user_id=user.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm" title="Aprovar Registo"><i class="fas fa-check"></i></button>
+                                </form>
+                                <form action="{{ url_for('reject_user', user_id=user.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Rejeitar Registo"><i class="fas fa-times"></i></button>
+                                </form>
+                            {% elif user.approval_status.name == 'APPROVED' %}
+                                <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-outline-info btn-sm" title="Editar Utilizador"><i class="fas fa-user-edit"></i></a>
+                                <a href="{{ url_for('change_password', user_id=user.id) }}" class="btn btn-outline-secondary btn-sm" title="Alterar Senha"><i class="fas fa-key"></i></a>
+                                {% if user.id != current_user.id %}
+                                <form action="{{ url_for('toggle_status', user_id=user.id) }}" method="post" class="d-inline">
+                                    {% if user.is_active %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Desativar Utilizador"><i class="fas fa-user-slash"></i></button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Ativar Utilizador"><i class="fas fa-user-check"></i></button>
+                                    {% endif %}
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                     {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum utilizador cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

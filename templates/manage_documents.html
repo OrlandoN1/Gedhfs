@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Documentos{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-file-alt me-2"></i>Gerenciar Documentos (Ativos e Obsoletos)</h2>
+        
+        <!-- Barra de Filtros -->
+        <div class="card card-body bg-light mb-4">
+            <form action="{{ url_for('manage_documents') }}" method="get" class="row g-3 align-items-end">
+                
+                {% if current_user.role.name == 'ADMIN' %}
+                <div class="col-md-5">
+                    <label for="department_id" class="form-label">Departamento</label>
+                    <select class="form-select" id="department_id" name="department_id">
+                        <option value="">-- Todos --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if dept.id == selected_dept_id %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="col-md-4">
+                    <label for="doc_type_filter" class="form-label">Tipo de Documento</label>
+                    <select class="form-select" id="doc_type_filter" name="doc_type_filter">
+                        <option value="">-- Todos --</option>
+                        {% for doc_type in doc_types %}
+                            <option value="{{ doc_type }}" {% if doc_type == selected_doc_type %}selected{% endif %}>
+                                {{ doc_type }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-filter me-2"></i>Filtrar</button>
+                    <a href="{{ url_for('manage_documents', clear='true') }}" class="btn btn-secondary"><i class="fas fa-eraser me-2"></i>Limpar</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Barra de Busca -->
+        <form action="{{ url_for('manage_documents') }}" method="get" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Buscar no título ou conteúdo..." name="q" value="{{ search_query or '' }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+
+        <!-- Lista de Documentos -->
+        <ul class="list-group">
+            {% for doc in documents %}
+            <li class="list-group-item d-flex justify-content-between align-items-center {% if not doc.is_active %}list-group-item-light text-muted{% endif %}">
+                <div>
+                    <span class="badge {% if doc.is_active %}bg-primary{% else %}bg-secondary{% endif %} me-2">
+                        {{ doc.doc_type }}-{{ "%02d"|format(doc.doc_number) }}-R{{ "%02d"|format(doc.doc_revision) }}
+                    </span>
+                    <h6 class="my-0 d-inline">{{ doc.title }}</h6>
+                    <br>
+                    <small class="ms-1">
+                        Depto: <strong>{{ doc.department.name }}</strong> | 
+                        Status: <strong>{% if doc.is_active %}Ativo{% else %}Obsoleto{% endif %}</strong>
+                    </small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <!-- BOTÃO DE HISTÓRICO ADICIONADO AQUI -->
+                    <a href="{{ url_for('document_history', doc_id=doc.id) }}" class="btn btn-sm btn-outline-secondary me-2" title="Ver Histórico de Revisões"><i class="fas fa-history"></i></a>
+                    <a href="{{ url_for('view_document', doc_id=doc.id) }}" class="btn btn-sm btn-info me-2" title="Visualizar"><i class="fas fa-eye"></i></a>
+                    <form action="{{ url_for('toggle_document_status', doc_id=doc.id) }}" method="post">
+                        {% if doc.is_active %}
+                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Marcar como Obsoleto"><i class="fas fa-archive"></i></button>
+                        {% else %}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Reativar Documento"><i class="fas fa-check-circle"></i></button>
+                        {% endif %}
+                    </form>
+                </div>
+            </li>
+            {% else %}
+            <li class="list-group-item text-center">Nenhum documento encontrado.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

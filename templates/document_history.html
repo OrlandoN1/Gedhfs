@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Histórico de Revisões{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-history me-2"></i>Histórico: <span class="text-primary">{{ doc_code }}</span>
+            <!-- NOME DO DEPARTAMENTO ADICIONADO AQUI -->
+            <small class="text-muted fw-normal">/ Depto: {{ department_name }}</small>
+        </h2>
+        <a href="{{ url_for('manage_documents') }}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Voltar para Gerenciamento</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Revisão</th>
+                            <th>Data da Revisão</th>
+                            <th>Título</th>
+                            <th>Status</th>
+                            <th>Data de Upload</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for revision in history %}
+                        <tr class="{% if not revision.is_active %}table-light text-muted{% endif %}">
+                            <td><strong>{{ "%02d"|format(revision.doc_revision) }}</strong></td>
+                            <td>{{ revision.revision_date.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ revision.title }}</td>
+                            <td>
+                                {% if revision.is_active %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Obsoleto</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ revision.upload_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td class="text-center">
+                                <a href="{{ url_for('view_document', doc_id=revision.id) }}" class="btn btn-sm btn-info" title="Visualizar esta revisão"><i class="fas fa-eye"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base_auth.html" %}
+{% block title %}Solicitar Cadastro{% endblock %}
+{% block content %}
+<div class="col-md-5">
+    <div class="text-center mb-4">
+        <i class="fas fa-user-plus fa-3x" style="color: #0d2d53;"></i>
+        <h2 class="mt-2" style="color: #0d2d53; font-weight: 500;">Solicitar Cadastro</h2>
+    </div>
+    <div class="card card-body shadow-sm">
+        {% if not departments %}
+        <div class="alert alert-warning" role="alert">
+            Nenhum departamento foi cadastrado no sistema. O registo não é possível no momento. Por favor, contate um administrador.
+        </div>
+        {% else %}
+        <form method="post">
+            <div class="mb-3">
+                <label for="username" class="form-label">Nome de Utilizador</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="department_ids" class="form-label">Seu Departamento</label>
+                <select class="form-select" id="department_ids" name="department_ids" multiple required>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Segure Ctrl (ou Cmd no Mac) para selecionar mais de um.</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i>Enviar Solicitação</button>
+        </form>
+        {% endif %}
+    </div>
+    <p class="mt-3 text-center">
+        Já tem uma conta? <a href="{{ url_for('login') }}">Faça o login aqui</a>.
+    </p>
+</div>
+{% endblock %}

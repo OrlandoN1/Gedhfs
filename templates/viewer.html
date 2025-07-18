@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Visualizador: {{ doc_title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .viewer-header {
+            background-color: #0d2d53;
+            color: white;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .viewer-header h5 { margin: 0; }
+        .viewer-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+        }
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            color: rgba(128, 128, 128, 0.15);
+            font-size: 5vw;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .history-sidebar {
+            width: 280px;
+            background-color: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+            padding: 1rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
+        }
+        .history-sidebar h6 {
+            font-weight: bold;
+            color: #0d2d53;
+        }
+        .history-sidebar.collapsed {
+            width: 0;
+            padding-left: 0;
+            padding-right: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewer-header">
+        <h5><i class="fas fa-file-pdf me-2"></i>{{ doc_title }}</h5>
+        <div>
+            <!-- BOTÃO PARA MOSTRAR/ESCONDER O HISTÓRICO -->
+            {% if current_user.role.name in ['ADMIN', 'UPLOADER'] %}
+            <button id="toggle-history-btn" class="btn btn-outline-light btn-sm me-3" title="Alternar Histórico">
+                <i class="fas fa-history"></i>
+            </button>
+            {% endif %}
+            <button onclick="window.history.back();" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-arrow-left me-2"></i>Voltar
+            </button>
+        </div>
+    </div>
+
+    <div class="viewer-container">
+        <div class="watermark">
+            Acesso por: {{ current_user.username }}<br>
+            Depto: {{ current_user.departments|map(attribute='name')|join(', ') }}
+        </div>
+
+        <iframe id="pdf-viewer" 
+                src="{{ url_for('static', filename='pdfjs/web/viewer.html') }}?file={{ url_for('serve_file', filename=filename) }}" 
+                title="Visualizador de PDF">
+        </iframe>
+
+        {% if current_user.role.name in ['ADMIN', 'UPLOADER'] %}
+        <div id="history-sidebar" class="history-sidebar">
+            <h6><i class="fas fa-info-circle me-2"></i>Detalhes do Documento</h6>
+            <ul class="list-group list-group-flush mb-4">
+                <li class="list-group-item"><strong>Código:</strong> {{ document.doc_type }}-{{ "%02d"|format(document.doc_number) }}</li>
+                <li class="list-group-item"><strong>Revisão:</strong> {{ "%02d"|format(document.doc_revision) }}</li>
+                <li class="list-group-item"><strong>Status:</strong> {% if document.is_active %}Ativo{% else %}Obsoleto{% endif %}</li>
+            </ul>
+
+            {% if history %}
+            <h6><i class="fas fa-history me-2"></i>Histórico de Revisões</h6>
+            <div class="list-group">
+                {% for old_rev in history %}
+                <a href="{{ url_for('view_document', doc_id=old_rev.id) }}" class="list-group-item list-group-item-action">
+                    Revisão {{ "%02d"|format(old_rev.doc_revision) }}
+                    <small class="d-block text-muted">{{ old_rev.upload_date.strftime('%d/%m/%Y') }}</small>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Função para bloquear o Ctrl+P
+        function blockPrint(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+                alert('A impressão está desabilitada para este documento.');
+                event.preventDefault();
+            }
+        }
+        window.addEventListener('keydown', blockPrint);
+        const viewerIframe = document.getElementById('pdf-viewer');
+        viewerIframe.addEventListener('load', function() {
+            try {
+                viewerIframe.contentWindow.addEventListener('keydown', blockPrint);
+            } catch (e) {
+                console.error("Não foi possível adicionar o bloqueio de impressão ao iframe:", e);
+            }
+        });
+
+        // Script para a barra lateral retrátil
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('toggle-history-btn');
+            const sidebar = document.getElementById('history-sidebar');
+
+            if (toggleBtn && sidebar) {
+                if (localStorage.getItem('sidebarState') === 'collapsed') {
+                    sidebar.classList.add('collapsed');
+                }
+
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('collapsed');
+                    if (sidebar.classList.contains('collapsed')) {
+                        localStorage.setItem('sidebarState', 'collapsed');
+                    } else {
+                        localStorage.setItem('sidebarState', 'expanded');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
